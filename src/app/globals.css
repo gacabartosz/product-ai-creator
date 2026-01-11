@@ -2,32 +2,233 @@
 @tailwind components;
 @tailwind utilities;
 
+/* iOS Crystal Mode - Design System */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  /* Crystal colors */
+  --crystal-bg: rgba(255, 255, 255, 0.7);
+  --crystal-bg-hover: rgba(255, 255, 255, 0.85);
+  --crystal-border: rgba(255, 255, 255, 0.3);
+  --crystal-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --crystal-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.15);
+
+  /* Accent colors - iOS Blue */
+  --accent: #007AFF;
+  --accent-hover: #0056CC;
+  --accent-light: rgba(0, 122, 255, 0.1);
+
+  /* Status colors */
+  --success: #34C759;
+  --warning: #FF9500;
+  --error: #FF3B30;
+
+  /* Text colors */
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --text-tertiary: #AEAEB2;
+
+  /* Gradient background */
+  --gradient-start: #E8E1F5;
+  --gradient-mid: #E1EFF7;
+  --gradient-end: #F5E1EA;
+
+  /* Blur values */
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-lg: 24px;
+  --blur-xl: 40px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+/* Base styles */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-primary);
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start) 0%,
+    var(--gradient-mid) 50%,
+    var(--gradient-end) 100%
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Crystal Card component */
+@layer components {
+  .crystal-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/30 rounded-2xl;
+    box-shadow: var(--crystal-shadow);
+    transition: all 0.2s ease;
+  }
+
+  .crystal-card:hover {
+    @apply bg-white/85;
+    box-shadow: var(--crystal-shadow-lg);
+  }
+
+  .crystal-card-flat {
+    @apply bg-white/50 backdrop-blur-lg border border-white/20 rounded-xl;
+  }
+
+  /* Crystal Button */
+  .crystal-button {
+    @apply px-4 py-2 rounded-xl font-medium transition-all duration-200;
+    @apply bg-white/70 backdrop-blur-md border border-white/30;
+    @apply hover:bg-white/90 active:scale-95;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .crystal-button-primary {
+    @apply px-4 py-2 rounded-xl font-medium transition-all duration-200;
+    @apply text-white;
+    background: var(--accent);
+    @apply hover:opacity-90 active:scale-95;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  }
+
+  .crystal-button-primary:hover {
+    background: var(--accent-hover);
+  }
+
+  /* Crystal Input */
+  .crystal-input {
+    @apply w-full px-4 py-3 rounded-xl transition-all duration-200;
+    @apply bg-white/50 backdrop-blur-md border border-white/30;
+    @apply focus:bg-white/70 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20;
+  }
+
+  .crystal-input::placeholder {
+    @apply text-gray-400;
+  }
+
+  /* Crystal Badge */
+  .crystal-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply bg-white/60 backdrop-blur-sm border border-white/30;
+  }
+
+  .crystal-badge-success {
+    @apply bg-green-100/60 text-green-800 border-green-200/50;
+  }
+
+  .crystal-badge-warning {
+    @apply bg-yellow-100/60 text-yellow-800 border-yellow-200/50;
+  }
+
+  .crystal-badge-error {
+    @apply bg-red-100/60 text-red-800 border-red-200/50;
+  }
+
+  .crystal-badge-info {
+    @apply bg-blue-100/60 text-blue-800 border-blue-200/50;
+  }
+
+  /* Crystal Modal Overlay */
+  .crystal-overlay {
+    @apply fixed inset-0 bg-black/20 backdrop-blur-sm;
+  }
+
+  /* Crystal Divider */
+  .crystal-divider {
+    @apply border-t border-white/30;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
+/* Utility classes */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--accent), #5856D6);
+  }
+
+  /* Glassmorphism utilities */
+  .glass-sm {
+    @apply bg-white/40 backdrop-blur-sm;
+  }
+
+  .glass-md {
+    @apply bg-white/50 backdrop-blur-md;
+  }
+
+  .glass-lg {
+    @apply bg-white/60 backdrop-blur-lg;
+  }
+
+  .glass-xl {
+    @apply bg-white/70 backdrop-blur-xl;
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Custom scrollbar - iOS style */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(0, 122, 255, 0.2);
 }

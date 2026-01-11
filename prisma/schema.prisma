@@ -1,0 +1,123 @@
+// Prisma Schema for Product AI Creator
+// Data pipeline for AI-powered e-commerce product creation
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Draft status enum
+enum DraftStatus {
+  PENDING      // Just uploaded, waiting for pipeline
+  PROCESSING   // Pipeline is running
+  READY        // Pipeline complete, ready for review
+  PUBLISHED    // Published to at least one platform
+  FAILED       // Pipeline or publish failed
+}
+
+// Product draft - main entity
+model Draft {
+  id          String      @id @default(cuid())
+  status      DraftStatus @default(PENDING)
+
+  // User input
+  userHint    String?     // Optional hint from user (e.g., "Nike Air Max size 42")
+  rawData     Json?       // Raw input data (EAN, price, SKU, etc.)
+
+  // AI-generated product data (UnifiedProduct schema)
+  product     Json?
+
+  // Vision analysis result (intermediate)
+  visionAnalysis Json?
+
+  // Error tracking
+  errorMessage   String?
+
+  // Timestamps
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  images      Image[]
+  publishLogs PublishLog[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Uploaded images
+model Image {
+  id        String   @id @default(cuid())
+
+  // Storage info
+  url       String   // Public URL (R2/S3)
+  filename  String   // Original filename
+  mimeType  String   // image/jpeg, image/png, etc.
+  size      Int      // File size in bytes
+
+  // Metadata
+  position  Int      @default(0) // Order in product gallery
+  alt       String?  // Alt text (AI-generated or user-provided)
+
+  // Relation
+  draftId   String
+  draft     Draft    @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([draftId])
+}
+
+// Publishing history
+model PublishLog {
+  id         String   @id @default(cuid())
+
+  // Platform info
+  platform   String   // 'prestashop', 'woocommerce', 'allegro', etc.
+
+  // Result
+  status     String   // 'success', 'failed', 'pending'
+  externalId String?  // Product ID on the platform
+  externalUrl String? // Product URL on the platform
+
+  // Response data
+  response   Json?    // Full API response for debugging
+  errorMessage String?
+
+  // Relation
+  draftId    String
+  draft      Draft    @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt  DateTime @default(now())
+
+  @@index([draftId])
+  @@index([platform])
+}
+
+// Platform configurations (optional - for multi-tenant scenarios)
+model PlatformConfig {
+  id          String   @id @default(cuid())
+
+  platform    String   @unique // 'prestashop', 'woocommerce', etc.
+
+  // Connection details (encrypted in production)
+  apiUrl      String
+  apiKey      String
+
+  // Platform-specific settings
+  settings    Json?    // Language ID, default category, etc.
+
+  // Status
+  isActive    Boolean  @default(true)
+  lastTestedAt DateTime?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
