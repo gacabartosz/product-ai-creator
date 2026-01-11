@@ -45,7 +45,7 @@ function getStorageConfig() {
   // Local storage (for development)
   return {
     provider: 'local' as const,
-    publicUrl: process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
+    publicUrl: process.env.PUBLIC_URL || 'http://localhost:3000',
   };
 }
 
