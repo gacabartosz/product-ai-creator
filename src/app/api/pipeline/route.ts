@@ -48,6 +48,10 @@ export async function POST(request: NextRequest) {
     });
 
     try {
+      // Extract language from rawData
+      const rawData = draft.rawData as Record<string, unknown> | null;
+      const language = (rawData?.language as string) || 'de';
+
       // Build pipeline input
       const pipelineInput: PipelineInput = {
         images: draft.images.map(img => ({
@@ -59,8 +63,15 @@ export async function POST(request: NextRequest) {
         rawData: draft.rawData as PipelineInput['rawData'],
       };
 
+      // Build pipeline options with language
+      const pipelineOptions = {
+        ...options,
+        language: language as 'pl' | 'en' | 'de',
+        useViaMallFormat: language === 'de' || language === 'pl',
+      };
+
       // Run pipeline
-      const result = await runPipeline(pipelineInput, options);
+      const result = await runPipeline(pipelineInput, pipelineOptions);
 
       // Update draft with results
       const updateData: Record<string, unknown> = {

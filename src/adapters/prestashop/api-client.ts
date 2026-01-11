@@ -17,6 +17,13 @@ export interface PrestaShopCategory {
   level_depth: number;
 }
 
+export interface PrestaShopLanguage {
+  id: number;
+  name: string;
+  iso_code: string;
+  active: boolean;
+}
+
 export interface PrestaShopProduct {
   id?: number;
   id_category_default: number;
@@ -119,6 +126,20 @@ export class PrestaShopApiClient {
 
     const data = await response.json();
     return data.categories || [];
+  }
+
+  // Get languages
+  async getLanguages(): Promise<PrestaShopLanguage[]> {
+    const response = await this.request(
+      'languages?display=[id,name,iso_code,active]&output_format=JSON'
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch languages: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.languages || [];
   }
 
   // Get product features (attributes)

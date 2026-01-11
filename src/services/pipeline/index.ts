@@ -3,6 +3,7 @@
 
 import { runVisionStage, urlsToBase64, type VisionStageInput } from './vision-stage';
 import { runContentStage, type ContentStageInput } from './content-stage';
+import { runViaMallContentStage, type ViaMallContentStageInput, type ViaMallContentGeneration } from './viamall-content-stage';
 import { runValidationStage, type ValidationStageInput } from './validation-stage';
 import type {
   PipelineInput,
@@ -17,6 +18,7 @@ import type { UnifiedProduct } from '@/types/unified-product';
 export {
   runVisionStage,
   runContentStage,
+  runViaMallContentStage,
   runValidationStage,
   urlsToBase64,
 };
@@ -24,6 +26,8 @@ export {
 export type {
   VisionStageInput,
   ContentStageInput,
+  ViaMallContentStageInput,
+  ViaMallContentGeneration,
   ValidationStageInput,
 };
 
@@ -41,7 +45,7 @@ export async function runPipeline(
   const startTime = Date.now();
   const errors: string[] = [];
 
-  const { onProgress, language = 'pl' } = options;
+  const { onProgress, language = 'pl', useViaMallFormat = false } = options;
 
   // Initialize results
   let visionResult: StageResult<VisionAnalysis> = {
@@ -116,20 +120,63 @@ export async function runPipeline(
     onProgress?.({
       stage: 'content',
       status: 'running',
-      message: 'Generating product content...',
+      message: useViaMallFormat ? 'Generating ViaMall content...' : 'Generating product content...',
       progress: 40,
     });
 
     try {
-      const contentInput: ContentStageInput = {
-        visionAnalysis: visionResult.data,
-        userHint: input.userHint,
-        rawData: input.rawData,
-        language,
-        imageCount: input.images.length,
-      };
+      if (useViaMallFormat && (language === 'de' || language === 'pl')) {
+        // Use ViaMall content stage for DE/PL languages
+        const viamallInput: ViaMallContentStageInput = {
+          visionAnalysis: visionResult.data,
+          userHint: input.userHint,
+          rawData: input.rawData,
+          language: language as 'de' | 'pl',
+          imageCount: input.images.length,
+        };
 
-      contentResult = await runContentStage(contentInput);
+        const viamallResult = await runViaMallContentStage(viamallInput);
+
+        // Convert ViaMall result to standard ContentGeneration format
+        if (viamallResult.status === 'completed' && viamallResult.data) {
+          contentResult = {
+            status: 'completed',
+            data: {
+              name: viamallResult.data.name,
+              shortDescription: viamallResult.data.shortDescription,
+              longDescription: viamallResult.data.longDescription,
+              htmlDescription: viamallResult.data.longDescription,
+              seoTitle: viamallResult.data.name.slice(0, 70),
+              seoDescription: viamallResult.data.shortDescription.replace(/<[^>]*>/g, '').slice(0, 160),
+              keywords: [],
+              attributes: {},
+              tags: [],
+              imageAlts: [],
+              rawResponse: viamallResult.data.rawResponse,
+              // Store ViaMall-specific data
+              viamallSlug: viamallResult.data.slug,
+            } as ContentGeneration & { viamallSlug?: string },
+            durationMs: viamallResult.durationMs,
+          };
+        } else {
+          contentResult = {
+            status: viamallResult.status,
+            error: viamallResult.error,
+            durationMs: viamallResult.durationMs,
+          };
+        }
+      } else {
+        // Use standard content stage
+        const contentInput: ContentStageInput = {
+          visionAnalysis: visionResult.data,
+          userHint: input.userHint,
+          rawData: input.rawData,
+          language,
+          imageCount: input.images.length,
+        };
+
+        contentResult = await runContentStage(contentInput);
+      }
 
       if (contentResult.status === 'failed') {
         errors.push(contentResult.error || 'Content generation failed');

@@ -4,7 +4,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createAdapter, type Platform, type PublishOptions } from '@/adapters';
+import { PrestaShopApiClient } from '@/adapters/prestashop/api-client';
 import type { UnifiedProduct } from '@/types/unified-product';
+
+// Language ISO code to PrestaShop ID mapping cache
+const languageIdCache: Map<string, string> = new Map();
 
 export const runtime = 'nodejs';
 export const maxDuration = 60; // 1 minute for publishing
@@ -90,9 +94,49 @@ export async function POST(
       );
     }
 
+    // Build final publish options with languageId
+    let finalOptions: PublishOptions = { ...options };
+
+    // Map language isoCode to PrestaShop languageId
+    if (platform === 'prestashop') {
+      const languageIso = (options as Record<string, unknown>)?.language as string;
+
+      if (languageIso && !finalOptions.languageId) {
+        // Check cache first
+        const cacheKey = `${platformConfig?.apiUrl || process.env.PRESTASHOP_URL}:${languageIso}`;
+
+        if (languageIdCache.has(cacheKey)) {
+          finalOptions.languageId = languageIdCache.get(cacheKey);
+        } else {
+          // Fetch languages from PrestaShop to find the ID
+          try {
+            const client = new PrestaShopApiClient({
+              apiUrl: platformConfig?.apiUrl || process.env.PRESTASHOP_URL!,
+              apiKey: platformConfig?.apiKey || process.env.PRESTASHOP_API_KEY!,
+              languageId: 1,
+            });
+
+            const languages = await client.getLanguages();
+            const matchedLang = languages.find(
+              l => l.iso_code.toLowerCase() === languageIso.toLowerCase()
+            );
+
+            if (matchedLang) {
+              const langId = String(matchedLang.id);
+              languageIdCache.set(cacheKey, langId);
+              finalOptions.languageId = langId;
+            }
+          } catch (langError) {
+            console.warn('Failed to fetch languages for mapping:', langError);
+            // Continue with default languageId
+          }
+        }
+      }
+    }
+
     // Publish product
     const product = draft.product as unknown as UnifiedProduct;
-    const publishResult = await adapter.publishProduct(product, options);
+    const publishResult = await adapter.publishProduct(product, finalOptions);
 
     // Create publish log
     const publishLog = await prisma.publishLog.create({

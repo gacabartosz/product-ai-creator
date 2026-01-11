@@ -160,3 +160,13 @@ export function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
+
+/**
+ * Build API URL with basePath
+ */
+export function apiUrl(path: string): string {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  // Ensure path starts with /
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${basePath}${normalizedPath}`;
+}

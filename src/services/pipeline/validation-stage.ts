@@ -109,8 +109,8 @@ function buildUnifiedProduct(
 ): Partial<UnifiedProduct> {
   const rawData = input.rawData || {};
 
-  // Determine pricing
-  const priceGross = rawData.priceGross || 0;
+  // Determine pricing (default to 99.99 if no price provided)
+  const priceGross = rawData.priceGross || 99.99;
   const vatRate = rawData.vatRate || 23;
   const priceNet = rawData.priceNet || calculateNetPrice(priceGross, vatRate);
 
@@ -130,9 +130,9 @@ function buildUnifiedProduct(
 
   // Build the product
   return {
-    name: content.name,
+    name: truncate(content.name, 128),
     description: {
-      short: content.shortDescription,
+      short: truncate(content.shortDescription, 500),
       long: content.longDescription,
       html: content.htmlDescription,
     },
@@ -144,7 +144,7 @@ function buildUnifiedProduct(
     pricing: {
       gross: priceGross,
       net: priceNet,
-      currency: 'PLN',
+      currency: rawData.currency || 'PLN',
       vatRate,
     },
     attributes: content.attributes,

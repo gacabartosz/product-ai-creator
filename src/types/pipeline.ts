@@ -23,6 +23,7 @@ export const PipelineInputSchema = z.object({
     priceGross: z.number().positive().optional(),
     priceNet: z.number().positive().optional(),
     vatRate: z.number().min(0).max(100).optional(),
+    currency: z.string().length(3).optional(), // EUR, PLN, etc.
     brand: z.string().optional(),
     manufacturer: z.string().optional(),
     quantity: z.number().int().min(0).optional(),
@@ -151,4 +152,8 @@ export interface PipelineOptions {
   // Custom system prompts
   visionSystemPrompt?: string;
   contentSystemPrompt?: string;
+
+  // Use ViaMall format for content generation
+  // When true, uses ViaMall-specific prompts with emoji bullets, special naming format
+  useViaMallFormat?: boolean;
 }

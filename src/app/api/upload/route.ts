@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
 
     // Get optional fields
     const userHint = formData.get('userHint') as string | null;
+    const language = formData.get('language') as string | null;
     const rawDataStr = formData.get('rawData') as string | null;
     let rawData: Record<string, unknown> | null = null;
 
@@ -54,6 +55,12 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+    }
+
+    // Ensure language is in rawData for pipeline
+    if (language) {
+      rawData = rawData || {};
+      rawData.language = language;
     }
 
     // Create draft first
