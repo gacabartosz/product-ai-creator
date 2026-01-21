@@ -6,11 +6,11 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Product Creator',
+  title: 'Product Creator - AI E-commerce Content',
   description: 'AI-powered product creation - mats, fences, mattresses, beds',
   keywords: ['AI', 'e-commerce', 'PrestaShop', 'maty wiklinowe', 'ploty', 'materace', 'lozka'],
   openGraph: {
-    title: 'Product Creator',
+    title: 'Product Creator - AI E-commerce Content',
     description: 'Automatyczne tworzenie opisow produktow - maty wiklinowe, ploty, materace, lozka. AI generuje opisy.',
     url: 'https://bartoszgaca.pl/product-ai-creator',
     siteName: 'Product Creator',

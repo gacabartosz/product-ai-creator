@@ -298,12 +298,12 @@ export default function Home() {
       <div className="max-w-5xl mx-auto space-y-8 relative z-10">
         {/* Header */}
         <div className="text-center space-y-4 animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-md border border-white/40 text-sm font-medium text-gray-700 shadow-lg">
+          <a href="/automations" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-md border border-white/40 text-sm font-medium text-gray-700 shadow-lg hover:shadow-xl transition-shadow">
             <Sparkles className="w-4 h-4 text-blue-500" />
-            AI-Powered Product Creation
-          </div>
+            AI E-commerce Content <span className="text-green-500 font-semibold">Powered by G.A.C.A.</span>
+          </a>
 
-          <h1 className="text-4xl md:text-5xl font-bold gradient-text tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold gradient-text tracking-tight font-mono">
             Product Creator
           </h1>
 
